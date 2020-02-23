@@ -1,0 +1,41 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint", "react", "react-native", "react-hooks"],
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking"
+  ],
+  "rules": {
+    "no-irregular-whitespace": "warn",
+    "no-misleading-character-class": "warn",
+    "use-isnan": "error",
+    "no-unexpected-multiline": "warn",
+    "no-sparse-arrays": "warn",
+    "dot-location": ["warn", "property"],
+    "eqeqeq": "warn",
+    "grouped-accessor-pairs": "warn",
+    "no-case-declarations": "error",
+    "no-useless-call": "warn",
+    "no-delete-var": "error",
+    "no-shadow": "warn",
+    "no-trailing-spaces": "warn",
+    "semi": "error",
+    "quotes": ["warn", "single", { "avoidEscape": true }],
+    "no-var": "error",
+    "prefer-const": "warn",
+    "max-len": ["warn", { "code": 100, "ignorePattern": "^import " }],
+
+    "@typescript-eslint/no-unused-vars": "off",
+    "@typescript-eslint/no-use-before-define": "off",
+    "@typescript-eslint/no-empty-interface": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/camelcase": "off",
+
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn"
+  }
+}
