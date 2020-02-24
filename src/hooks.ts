@@ -6,5 +6,5 @@ import { Users } from './MockData';
 // It will be a hook that loads current user id from store
 export const useGetIsYou = (id: string) => id === '1';
 
-export const useGetUserName = (id: string) =>
-  R.o(R.prop('name'), R.find(R.propEq('id', id)))(Users);
+export const useGetUserName = (id: string): string =>
+  R.o(R.propOr('', 'name'), R.find(R.propEq('id', id)))(Users);

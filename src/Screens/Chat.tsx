@@ -1,12 +1,18 @@
-import React from 'react';
-import { View, Text, Route, FlatList, StyleSheet } from 'react-native';
+import React, { useEffect, useCallback, useState } from 'react';
+import {
+  View,
+  Route,
+  KeyboardAvoidingView,
+  Animated,
+  Keyboard,
+  StyleSheet,
+} from 'react-native';
 import * as R from 'ramda';
 
-import { getRouteParam, addOpacity } from '../utils';
-import { useGetIsYou, useGetUserName } from '../hooks';
+import { getRouteParam } from '../utils';
 import { Conversations, ConversationI, MessageI } from '../MockData';
-
-import { Colors } from '../styles';
+import MessageInput from '../containters/MessageInput';
+import Messages from '../containters/Messages';
 
 // TODO: use Navigation interface
 interface Props extends Route {
@@ -14,71 +20,73 @@ interface Props extends Route {
   route: Route;
 }
 
-const getChatData = (id: string) => R.find(R.propEq('id', id), Conversations);
-
-const renderMessage = ({
-  item: { usr_id, text, id },
-  index,
-}: {
-  item: MessageI;
-  index: number;
-}) => {
-  const isYou = useGetIsYou(usr_id);
-  const userName = useGetUserName(usr_id);
-  console.log(index);
-
-  return (
-    <View key={index} style={styles.message}>
-      {!isYou && <Text style={styles['message--userName']}>{userName}</Text>}
-      <View
-        style={[
-          styles['message--text'],
-          styles[isYou ? 'message--text-you' : 'message--text-other'],
-        ]}
-      >
-        <Text>{text}</Text>
-      </View>
-    </View>
-  );
-};
+const getChatData = (id: string): ConversationI =>
+  R.find(R.propEq('id', id), Conversations);
 
 const Chat = ({ navigation: { setOptions }, ...otherProps }: Props) => {
   const id: any = getRouteParam('id')(otherProps);
   const { messages, users, name } = getChatData(id);
 
+  const keyboardHeight = new Animated.Value(0);
+
+  const keyboardDidShow = useCallback(
+    event => {
+      Animated.timing(keyboardHeight, {
+        duration: event.duration,
+        toValue: event.endCoordinates.height,
+      }).start();
+    },
+    [keyboardHeight]
+  );
+
+  const keyboardDidHide = useCallback(
+    event => {
+      Animated.timing(keyboardHeight, {
+        duration: event.duration,
+        toValue: 0,
+      }).start();
+    },
+    [keyboardHeight]
+  );
+
+  useEffect(() => {
+    const keyboardWillShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      keyboardDidShow
+    );
+    const keyboardWillHideListener = Keyboard.addListener(
+      'keyboardDidHide',
+      keyboardDidHide
+    );
+    return () => {
+      keyboardWillShowListener.remove();
+      keyboardWillHideListener.remove();
+    };
+  }, [keyboardDidShow, keyboardDidHide]);
+
   setOptions({ title: name });
 
   return (
-    <View>
-      <FlatList data={messages} renderItem={renderMessage} />
-    </View>
+    <Animated.View
+      style={[styles.container, { paddingBottom: keyboardHeight }]}
+      behavior="position"
+    >
+      <View style={styles.messages}>
+        <Messages messages={messages} />
+      </View>
+      <View style={styles.input}>
+        <MessageInput />
+      </View>
+    </Animated.View>
   );
 };
 
 export default Chat;
 
 const styles = StyleSheet.create({
-  ['message']: {
-    flex: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
-  ['message--userName']: {
-    color: Colors.Disabled,
-  },
-
-  ['message--text']: {
-    flex: 1,
-    // margin: 20,
-    padding: 10,
-  },
-  ['message--text-you']: {
-    backgroundColor: Colors.Primary,
-    alignItems: 'flex-end',
-    marginLeft: 50,
-  },
-  ['message--text-other']: {
-    backgroundColor: addOpacity(Colors.Primary, '33'),
-    marginRight: 50,
+  container: { flex: 1 },
+  messages: { flex: 1 },
+  input: {
+    height: 60,
   },
 });

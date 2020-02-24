@@ -52,7 +52,7 @@ export const Conversations: ConversationI[] = [
       { id: '7', text: 'Oh sugar, honey, ice tea.', usr_id: '1' },
       { id: '8', text: 'Marty!', usr_id: '2' },
       { id: '9', text: "I'm gonna kill you!", usr_id: '2' },
-      { text: 'Hey! Hold on! Hold on!', usr_id: '1' },
+      { id: '10', text: 'Hey! Hold on! Hold on!', usr_id: '1' },
     ],
   },
 ];
