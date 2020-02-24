@@ -1,14 +1,20 @@
 export interface MessageI {
-  id?: string;
+  id: string;
   text: string;
   usr_id: string;
+  seen?: boolean;
+}
+
+export interface ConversationUserI {
+  id: string;
+  msg_id?: string;
 }
 
 export interface ConversationI {
   id: string;
   name: string;
   messages?: MessageI[];
-  users: string[];
+  users: ConversationUserI[];
 }
 
 interface UserI {
@@ -20,7 +26,10 @@ export const Conversations: ConversationI[] = [
   {
     name: 'Marty',
     id: '1',
-    users: ['0', '1'],
+    users: [
+      { id: '0', msg_id: '3' },
+      { id: '1', msg_id: '4' },
+    ],
     messages: [
       { id: '1', text: 'Hi', usr_id: '0' },
       { id: '2', text: 'Hello', usr_id: '1' },
@@ -32,12 +41,17 @@ export const Conversations: ConversationI[] = [
       { id: '4', text: 'Huh?', usr_id: '1' },
     ],
   },
-  { name: 'Alex', id: '2', users: ['0', '2'] },
-  { name: 'Gloria', id: '3', users: ['0', '13'] },
+  { name: 'Alex', id: '2', users: [{ id: '0' }, { id: '2' }] },
+  { name: 'Gloria', id: '3', users: [{ id: '0' }, { id: '3' }] },
   {
-    name: 'Marty, Alex, You',
+    name: 'Marty, Alex, Gloria, You',
     id: '4',
-    users: ['0', '1', '2'],
+    users: [
+      { id: '0', msg_id: '7' },
+      { id: '1', msg_id: '10' },
+      { id: '2', msg_id: '19' },
+      { id: '3', msg_id: '1' },
+    ],
 
     messages: [
       { id: '1', text: 'Marty! Marty!', usr_id: '2' },
@@ -53,6 +67,36 @@ export const Conversations: ConversationI[] = [
       { id: '8', text: 'Marty!', usr_id: '2' },
       { id: '9', text: "I'm gonna kill you!", usr_id: '2' },
       { id: '10', text: 'Hey! Hold on! Hold on!', usr_id: '1' },
+      {
+        id: '11',
+        text: "Look at us! We're all here together safe and sound.!",
+        usr_id: '3',
+      },
+      { id: '12', text: 'Yeah, here we are.', usr_id: '0' },
+      { id: '13', text: 'Where exactly is here?', usr_id: '0' },
+      { id: '14', text: 'San Diego!', usr_id: '0' },
+      { id: '15', text: 'San Diego?', usr_id: '2' },
+      {
+        id: '16',
+        text: 'White sandy beaches, cleverly simulated natural environment...',
+        usr_id: '0',
+      },
+      {
+        id: '17',
+        text:
+          "...wide open enclosures, I'm telling you this could be the San Diego zoo.",
+        usr_id: '0',
+      },
+      {
+        id: '18',
+        text: 'Complete with fake rocks. Wow! That looks real',
+        usr_id: '0',
+      },
+      {
+        id: '19',
+        text: 'San Diego? What could beworse than San Diego?',
+        usr_id: '2',
+      },
     ],
   },
 ];

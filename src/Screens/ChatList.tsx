@@ -7,9 +7,12 @@ import {
   TouchableHighlight,
 } from 'react-native';
 import * as R from 'ramda';
+import { useSelector } from 'react-redux';
 
-import { Conversations, ConversationI } from '../MockData';
+import { ConversationI } from '../MockData';
 import { Screens } from '../constants';
+import { getAllChats } from '../ducks/chatList';
+
 import { Colors } from '../styles';
 
 const getLastMessageText = R.compose(
@@ -39,13 +42,12 @@ interface Props {
 }
 
 const ChatList = ({ navigation: { navigate } }: Props) => {
+  const chats = useSelector(getAllChats);
+
   return (
     <View>
       <Text>List</Text>
-      <FlatList
-        data={Conversations}
-        renderItem={makeRenderChatItem(navigate)}
-      />
+      <FlatList data={chats} renderItem={makeRenderChatItem(navigate)} />
     </View>
   );
 };

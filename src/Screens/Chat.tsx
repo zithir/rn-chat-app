@@ -7,12 +7,13 @@ import {
   Keyboard,
   StyleSheet,
 } from 'react-native';
+import { useSelector } from 'react-redux';
 import * as R from 'ramda';
 
 import { getRouteParam } from '../utils';
-import { Conversations, ConversationI, MessageI } from '../MockData';
 import MessageInput from '../containters/MessageInput';
-import Messages from '../containters/Messages';
+import MessagesList from '../containters/MessagesList';
+import { getSingleChat } from '../ducks/chatList';
 
 // TODO: use Navigation interface
 interface Props extends Route {
@@ -20,12 +21,10 @@ interface Props extends Route {
   route: Route;
 }
 
-const getChatData = (id: string): ConversationI =>
-  R.find(R.propEq('id', id), Conversations);
-
 const Chat = ({ navigation: { setOptions }, ...otherProps }: Props) => {
   const id: any = getRouteParam('id')(otherProps);
-  const { messages, users, name } = getChatData(id);
+  const { messages, users, name } = useSelector(getSingleChat(id));
+  setOptions({ title: name });
 
   const keyboardHeight = new Animated.Value(0);
 
@@ -64,15 +63,12 @@ const Chat = ({ navigation: { setOptions }, ...otherProps }: Props) => {
     };
   }, [keyboardDidShow, keyboardDidHide]);
 
-  setOptions({ title: name });
-
   return (
     <Animated.View
       style={[styles.container, { paddingBottom: keyboardHeight }]}
-      behavior="position"
     >
       <View style={styles.messages}>
-        <Messages messages={messages} />
+        <MessagesList messages={messages} users={users} />
       </View>
       <View style={styles.input}>
         <MessageInput />
