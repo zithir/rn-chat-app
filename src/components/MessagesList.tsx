@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { FlatList, Text, SectionList } from 'react-native';
+import { FlatList, Text, SectionList, NativeScrollEvent } from 'react-native';
 import * as R from 'ramda';
 
 import Message from './Message';
 import IndicatorCover from './IndicatorCover';
+import GoToBottomButton from './GoToBottomButton';
 import { useGetLastReadMessage } from '../hooks';
 import { MessageI, ConversationUserI } from '../MockData';
 
@@ -16,6 +17,12 @@ const isLastRead = (index: number, type: string) =>
 
 const isLastReadInInitialRender = (unreadMessages: MessageI[]) =>
   unreadMessages.length < InitialRenderItemsCount;
+
+const getYContentOffset = R.path(['nativeEvent', 'contentOffset', 'y']);
+
+// 50 is an approximate offset where last message becomes visible, it can be changed
+const hasReachedBottom = (event: NativeScrollEvent) =>
+  getYContentOffset(event) < 50;
 
 const makeRenderMessage = (scrollToLastReadMessage: Function) => ({
   index,
@@ -54,7 +61,7 @@ interface Props {
   users: ConversationUserI[];
 }
 
-const Messages = ({ messages = [], users }: Props) => {
+const MessagesList = ({ messages = [], users }: Props) => {
   const listRef = useRef();
   const lastReadMessageIndex = useGetLastReadMessage(users, messages);
 
@@ -65,6 +72,10 @@ const Messages = ({ messages = [], users }: Props) => {
 
   const [isLastReadRendered, setIsLastReadRendered] = useState(
     isLastReadInInitialRender(unreadMessages)
+  );
+
+  const [isGoToBottomButtonVisible, setGoToBottomButtonVisible] = useState(
+    !isLastReadRendered
   );
 
   // This is sent as callback to last read message and call on its render
@@ -85,11 +96,32 @@ const Messages = ({ messages = [], users }: Props) => {
   }, [listRef, setIsLastReadRendered]);
 
   const handleScrollFailed = useCallback(() => {
-    console.warn('Scroll to last read failed');
+    // DEBUG
+    console.log('Scroll to last read failed');
 
     // If scroll fails, try again after some time.
     setTimeout(scrollToLastReadMessage, 300);
   }, [scrollToLastReadMessage]);
+
+  const scrollToBottom = useCallback(() => {
+    if (listRef.current) {
+      listRef.current.scrollToLocation({
+        sectionIndex: 0,
+        itemIndex: 0,
+      });
+    }
+  }, [listRef]);
+
+  const toggleGoToBottomButton = useCallback(
+    (event: NativeScrollEvent) => {
+      if (hasReachedBottom(event)) {
+        setGoToBottomButtonVisible(false);
+      } else if (!isGoToBottomButtonVisible) {
+        setGoToBottomButtonVisible(true);
+      }
+    },
+    [isGoToBottomButtonVisible, setGoToBottomButtonVisible]
+  );
 
   return (
     <>
@@ -106,9 +138,14 @@ const Messages = ({ messages = [], users }: Props) => {
         // using Footer because the list is inverted
         renderSectionFooter={renderUnreadFooter}
         initialNumToRender={InitialRenderItemsCount}
+        onScroll={toggleGoToBottomButton}
+        scrollEventThrottle={1000}
       />
+      {isGoToBottomButtonVisible && (
+        <GoToBottomButton onPress={scrollToBottom} />
+      )}
     </>
   );
 };
 
-export default Messages;
+export default MessagesList;
