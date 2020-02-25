@@ -2,7 +2,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import {
   View,
   Route,
-  KeyboardAvoidingView,
+  Text,
   Animated,
   Keyboard,
   StyleSheet,
@@ -11,8 +11,8 @@ import { useSelector } from 'react-redux';
 import * as R from 'ramda';
 
 import { getRouteParam } from '../utils';
-import MessageInput from '../containters/MessageInput';
-import MessagesList from '../containters/MessagesList';
+import MessageInput from '../components/MessageInput';
+import MessagesList from '../components/MessagesList';
 import { getSingleChat } from '../ducks/chatList';
 
 // TODO: use Navigation interface
@@ -22,8 +22,8 @@ interface Props extends Route {
 }
 
 const Chat = ({ navigation: { setOptions }, ...otherProps }: Props) => {
-  const id: any = getRouteParam('id')(otherProps);
-  const { messages, users, name } = useSelector(getSingleChat(id));
+  const id: string | undefined = getRouteParam('id')(otherProps);
+  const { messages = [], users, name } = useSelector(getSingleChat(id));
   setOptions({ title: name });
 
   const keyboardHeight = new Animated.Value(0);
@@ -68,7 +68,11 @@ const Chat = ({ navigation: { setOptions }, ...otherProps }: Props) => {
       style={[styles.container, { paddingBottom: keyboardHeight }]}
     >
       <View style={styles.messages}>
-        <MessagesList messages={messages} users={users} />
+        {R.isEmpty(messages) ? (
+          <Text>No messages so far</Text>
+        ) : (
+          <MessagesList messages={messages} users={users} />
+        )}
       </View>
       <View style={styles.input}>
         <MessageInput />

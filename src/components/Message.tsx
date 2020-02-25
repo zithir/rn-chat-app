@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useLayoutEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { useGetIsYou, useGetUserName } from '../hooks';
@@ -8,17 +8,25 @@ import { addOpacity } from '../utils';
 
 import { Colors } from '../styles';
 
-const Message = ({ usr_id, id, text }: MessageI) => {
+interface Props extends MessageI {
+  scrollToLastReadMessage?: Function | undefined;
+}
+
+const Message = ({
+  usr_id,
+  id,
+  text,
+  scrollToLastReadMessage = () => undefined,
+}: Props) => {
   const isYou = useGetIsYou(usr_id);
   const userName = useGetUserName(usr_id) || '';
   const [seen, setSeen] = useState(false);
 
-  //Debug
-  // useEffect(() => {
-  //   setTimeout(() => {
-  //     setSeen(true);
-  //   }, 1500);
-  // });
+  // TODO: the first callback always fails as if the element is not rendered
+  // - fix, try using useEffect with arg
+  useLayoutEffect(() => {
+    scrollToLastReadMessage();
+  }, [scrollToLastReadMessage]);
 
   return (
     <View style={styles.message}>
