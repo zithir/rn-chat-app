@@ -110,7 +110,7 @@ const MessagesList = ({ chat }: Props) => {
       });
       setTimeout(() => {
         setIsLastReadRendered(true);
-      }, 400);
+      }, 500);
       return 'Scrolled';
     }
   }, [listRef, setIsLastReadRendered]);
@@ -162,7 +162,6 @@ const MessagesList = ({ chat }: Props) => {
             messages
           )
         ) {
-          console.log('Setting to, ', lastViewableUnreadMessageId);
           lastReadMessageId.current = lastViewableUnreadMessageId;
         }
       }
@@ -205,6 +204,10 @@ const MessagesList = ({ chat }: Props) => {
         scrollEventThrottle={1000}
         // TODO: optimize debounce time
         onViewableItemsChanged={debounce(setMessageSeen, 500)}
+        viewabilityConfig={{
+          // Message must be either whole visible or cover the whole viewport to be considered viewable
+          viewAreaCoveragePercentThreshold: 100,
+        }}
       />
       {isGoToBottomButtonVisible && (
         <GoToBottomButton onPress={scrollToBottom} />
