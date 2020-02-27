@@ -77,7 +77,7 @@ const MessagesList = ({ chat }: Props) => {
   const lastReadMessageId = useRef(
     R.path<string>(['messages', initialLastReadMessageIndex, 'id'], chat)
   );
-  const { messages, users } = chat;
+  const { messages } = chat;
 
   const [readMessages, unreadMessages] = R.splitAt(
     initialLastReadMessageIndex + 1,
@@ -92,7 +92,14 @@ const MessagesList = ({ chat }: Props) => {
     !isLastReadRendered
   );
 
-  // This is sent as callback to last read message and called on its render
+  /**
+   * Scrolls to the position of the last read message and then hides the covering modal
+   *
+   * It is passed as a callback to the last read message and called on its render
+   * and called with a delay in the scroll fails.
+   * The modal is hidden after a delay. Without the timeout, the user would see the
+   * transition from bottm of chat to the last read postion
+   */
   const scrollToLastReadMessage = useCallback(() => {
     if (listRef.current) {
       listRef.current.scrollToLocation({
@@ -101,8 +108,6 @@ const MessagesList = ({ chat }: Props) => {
         viewPosition: 0.15,
         animated: false,
       });
-      // Without the timeout, user sees transition from bottom of messages list
-      // to the last read position.
       setTimeout(() => {
         setIsLastReadRendered(true);
       }, 400);
@@ -127,7 +132,7 @@ const MessagesList = ({ chat }: Props) => {
     }
   }, [listRef]);
 
-  // Shows and hides go to bottom button
+  /** Shows and hides go to bottom button */
   const toggleGoToBottomButton = useCallback(
     (event: NativeScrollEvent) => {
       if (hasReachedBottom(event)) {
@@ -139,27 +144,15 @@ const MessagesList = ({ chat }: Props) => {
     [isGoToBottomButtonVisible, setGoToBottomButtonVisible]
   );
 
+  /**
+   * Checks if any newer unread message is visible on the screen and updates the
+   * last read message index.
+   */
   const setMessageSeen = useCallback(
-    ({
-      viewableItems,
-    }: {
-      viewableItems: Array<ViewToken>;
-      changed: Array<ViewToken>;
-    }) => {
+    ({ viewableItems }: { viewableItems: Array<ViewToken> }) => {
       if (isLastReadRendered && unreadMessages.length > 0) {
         const lastViewableUnreadMessageId = getLastViewableUnread(
           viewableItems
-        );
-        console.log(
-          {
-            lastViewableUnreadMessageId,
-            lastReadMessageId: lastReadMessageId.current,
-          },
-          isLastUnreadNewerThanCurrent(
-            lastViewableUnreadMessageId,
-            lastReadMessageId.current,
-            messages
-          )
         );
 
         if (
@@ -177,7 +170,11 @@ const MessagesList = ({ chat }: Props) => {
     [isLastReadRendered, currentUserId, messages]
   );
 
-  // On unmount,update the active chat in the chat list
+  /**
+   * On unmount,update the active chat in the chat list
+   * TODO: the action dispatches with the initial state of the chat, it should be
+   * saved to a ref on each update or handled by redux
+   * */
   useEffect(
     () => () => {
       dispatch(
