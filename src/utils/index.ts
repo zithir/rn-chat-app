@@ -27,15 +27,6 @@ export const isLastUnreadNewerThanCurrent = (
   last: string,
   current: string,
   messages: Message[]
-) => {
-  console.log({
-    last,
-    lastIndex: findIndexById(last)(messages),
-    currentIndex: findIndexById(current)(messages),
-  });
-  return (
-    last && findIndexById(last)(messages) > findIndexById(current)(messages)
-  );
-};
+) => last && findIndexById(last)(messages) > findIndexById(current)(messages);
 
 export { default as getLastViewableUnread } from './getLastUnread';

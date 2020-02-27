@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { debounce } from 'debounce';
 
 import Message from './Message';
-import IndicatorCover from './IndicatorCover';
+import LoadingModal from './LoadingModal';
 import GoToBottomButton from './GoToBottomButton';
 import renderUnreadMessagesSeparator from './UnreadMessagesSeparator';
 import { Conversation, Message as iMessage } from '../types';
@@ -187,7 +187,7 @@ const MessagesList = ({ chat }: Props) => {
 
   return (
     <>
-      {!isLastReadRendered && <IndicatorCover />}
+      {!isLastReadRendered && <LoadingModal />}
       <SectionList
         inverted
         ref={listRef}
