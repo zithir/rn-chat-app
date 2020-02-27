@@ -14,7 +14,7 @@ import Message from './Message';
 import LoadingModal from './LoadingModal';
 import GoToBottomButton from './GoToBottomButton';
 import renderUnreadMessagesSeparator from './UnreadMessagesSeparator';
-import { Conversation, Message as iMessage } from '../types';
+import { Conversation, Message as iMessage, ConversationUser } from '../types';
 import {
   getLastViewableUnread,
   getLastReadMessageIndex,
@@ -31,6 +31,9 @@ const InitialRenderItemsCount = 10;
 const isLastRead = (index: number, type: string) =>
   index === 0 && type === 'read';
 
+const getIsLastReadBy = (messageId: string, users: ConversationUser[]) =>
+  R.filter(R.propEq('msg_id', messageId), users);
+
 const isLastReadInInitialRender = (unreadMessages: iMessage[]) =>
   unreadMessages.length < InitialRenderItemsCount;
 
@@ -40,7 +43,10 @@ const getYContentOffset = R.path<number>(['nativeEvent', 'contentOffset', 'y']);
 const hasReachedBottom = (event: NativeScrollEvent) =>
   getYContentOffset(event) < 50;
 
-const makeRenderMessage = (scrollToLastReadMessage: Function) => ({
+const makeRenderMessage = (
+  scrollToLastReadMessage: Function,
+  users: ConversationUser[]
+) => ({
   index,
   item: { usr_id, text, id },
   section: { type },
@@ -58,6 +64,7 @@ const makeRenderMessage = (scrollToLastReadMessage: Function) => ({
       scrollToLastReadMessage={
         isLastRead(index, type) ? scrollToLastReadMessage : undefined
       }
+      lastReadBy={getIsLastReadBy(id, users)}
     />
   );
 };
@@ -77,7 +84,7 @@ const MessagesList = ({ chat }: Props) => {
   const lastReadMessageId = useRef(
     R.path<string>(['messages', initialLastReadMessageIndex, 'id'], chat)
   );
-  const { messages } = chat;
+  const { messages, users } = chat;
 
   const [readMessages, unreadMessages] = R.splitAt(
     initialLastReadMessageIndex + 1,
@@ -195,7 +202,7 @@ const MessagesList = ({ chat }: Props) => {
           { type: 'unread', data: R.reverse(unreadMessages) },
           { type: 'read', data: R.reverse(readMessages) },
         ]}
-        renderItem={makeRenderMessage(scrollToLastReadMessage)}
+        renderItem={makeRenderMessage(scrollToLastReadMessage, users)}
         onScrollToIndexFailed={handleScrollFailed}
         // List is inverted and so is order of footer and header
         renderSectionFooter={renderUnreadMessagesSeparator}

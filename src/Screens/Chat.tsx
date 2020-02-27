@@ -7,13 +7,14 @@ import {
   Keyboard,
   StyleSheet,
 } from 'react-native';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import * as R from 'ramda';
 
 import { getRouteParam } from '../utils';
+import { setLastRead } from '../utils/updateActiveChat';
 import MessageInput from '../components/MessageInput';
 import MessagesList from '../components/MessagesList';
-import { getSingleChat } from '../ducks/chatList';
+import { getSingleChat, updateActiveChat } from '../ducks/chatList';
 import { Conversation } from '../types';
 
 // TODO: use Navigation interface
@@ -25,10 +26,14 @@ interface Props extends Route {
 const Chat = ({ navigation: { setOptions }, ...otherProps }: Props) => {
   const id: string = getRouteParam('id')(otherProps);
   const chat: Conversation = useSelector(getSingleChat(id));
+  const dispatch = useDispatch();
 
-  // useEffect(() => {
-  //   console.log(chat);
-  // });
+  //DEBUG: simulates that Gloria reads everyting after 5 seconds
+  useEffect(() => {
+    setTimeout(() => {
+      dispatch(updateActiveChat(setLastRead('3', '29', chat)));
+    }, 5000);
+  }, []);
 
   setOptions({ title: chat.name });
 

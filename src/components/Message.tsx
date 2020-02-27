@@ -2,25 +2,26 @@ import React, { useState, useLayoutEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { useGetIsYou, useGetUserName } from '../hooks';
-
-import { MessageI } from '../MockData';
+import { Message, ConversationUser } from '../types';
 import { addOpacity } from '../utils';
+import UserBadge from '../components/UserBadge';
 
 import { Colors } from '../styles';
 
-interface Props extends MessageI {
+interface Props extends Message {
   scrollToLastReadMessage?: Function | undefined;
+  lastReadBy: ConversationUser[];
 }
 
-const Message = ({
+export default ({
   usr_id,
   id,
   text,
   scrollToLastReadMessage = () => undefined,
+  lastReadBy = [],
 }: Props) => {
   const isYou = useGetIsYou(usr_id);
   const userName = useGetUserName(usr_id) || '';
-  const [seen, setSeen] = useState(false);
 
   // TODO: the first callback always fails as if the element is not rendered
   // - fix, try using useEffect with arg
@@ -30,21 +31,23 @@ const Message = ({
 
   return (
     <View style={styles.message}>
-      {!isYou && <Text style={styles['message--userName']}>{userName}</Text>}
+      {!isYou && <Text style={styles['message__userName']}>{userName}</Text>}
       <View
         style={[
-          styles['message--text'],
-          styles[isYou ? 'message--text-you' : 'message--text-other'],
-          seen && styles['message--text-seen'],
+          styles['message__text'],
+          styles[isYou ? 'message__text-you' : 'message__text-other'],
         ]}
       >
         <Text>{text}</Text>
       </View>
+      <View style={styles.message__badgeRow}>
+        {lastReadBy.map(({ id }: { id: string }) => (
+          <UserBadge id={id} key={id} />
+        ))}
+      </View>
     </View>
   );
 };
-
-export default Message;
 
 const styles = StyleSheet.create({
   ['message']: {
@@ -52,25 +55,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
   },
-  ['message--userName']: {
+  ['message__userName']: {
     color: Colors.Disabled,
   },
 
-  ['message--text']: {
+  ['message__text']: {
     flex: 1,
     // margin: 20,
     padding: 10,
   },
-  ['message--text-you']: {
+  ['message__text-you']: {
     backgroundColor: Colors.Primary,
     alignItems: 'flex-end',
     marginLeft: 50,
   },
-  ['message--text-other']: {
+  ['message__text-other']: {
     backgroundColor: addOpacity(Colors.Primary, '33'),
     marginRight: 50,
   },
-  ['message--text-seen']: {
-    backgroundColor: addOpacity(Colors.Danger, '33'),
+  ['message__badgeRow']: {
+    flex: 1,
+    alignContent: 'flex-end',
+    flexDirection: 'row',
   },
 });
