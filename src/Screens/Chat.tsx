@@ -14,6 +14,7 @@ import { getRouteParam } from '../utils';
 import MessageInput from '../components/MessageInput';
 import MessagesList from '../components/MessagesList';
 import { getSingleChat } from '../ducks/chatList';
+import { Conversation } from '../types';
 
 // TODO: use Navigation interface
 interface Props extends Route {
@@ -22,9 +23,14 @@ interface Props extends Route {
 }
 
 const Chat = ({ navigation: { setOptions }, ...otherProps }: Props) => {
-  const id: string | undefined = getRouteParam('id')(otherProps);
-  const { messages = [], users, name } = useSelector(getSingleChat(id));
-  setOptions({ title: name });
+  const id: string = getRouteParam('id')(otherProps);
+  const chat: Conversation = useSelector(getSingleChat(id));
+
+  // useEffect(() => {
+  //   console.log(chat);
+  // });
+
+  setOptions({ title: chat.name });
 
   const keyboardHeight = new Animated.Value(0);
 
@@ -68,10 +74,10 @@ const Chat = ({ navigation: { setOptions }, ...otherProps }: Props) => {
       style={[styles.container, { paddingBottom: keyboardHeight }]}
     >
       <View style={styles.messages}>
-        {R.isEmpty(messages) ? (
+        {R.isEmpty(chat.messages) ? (
           <Text>No messages so far</Text>
         ) : (
-          <MessagesList messages={messages} users={users} />
+          <MessagesList chat={chat} />
         )}
       </View>
       <View style={styles.input}>

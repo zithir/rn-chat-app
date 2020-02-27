@@ -11,7 +11,7 @@ import { useSelector } from 'react-redux';
 
 import { ConversationI } from '../MockData';
 import { Screens } from '../constants';
-import { getAllChats } from '../ducks/chatList';
+import { getAllChats, getSingleChat } from '../ducks/chatList';
 
 import { Colors } from '../styles';
 

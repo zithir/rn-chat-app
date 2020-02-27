@@ -2,6 +2,6 @@ import * as R from 'ramda';
 
 export const ReducerName = 'user';
 
-export const getUser = R.path([ReducerName, 'userId']);
+export const getUser = R.path<string>([ReducerName, 'userId']);
 
-export default () => ({ userId: '0' });
+export default () => ({ userId: '1' });

@@ -1,12 +1,28 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { FlatList, Text, SectionList, NativeScrollEvent } from 'react-native';
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from 'react';
+import { Text, SectionList, NativeScrollEvent, ViewToken } from 'react-native';
 import * as R from 'ramda';
+import { useDispatch, useSelector } from 'react-redux';
+import { debounce } from 'debounce';
 
 import Message from './Message';
 import IndicatorCover from './IndicatorCover';
 import GoToBottomButton from './GoToBottomButton';
-import { useGetLastReadMessage } from '../hooks';
-import { MessageI, ConversationUserI } from '../MockData';
+import renderUnreadMessagesSeparator from './UnreadMessagesSeparator';
+import { Conversation, Message as iMessage } from '../types';
+import {
+  getLastViewableUnread,
+  getLastReadMessageIndex,
+  isLastUnreadNewerThanCurrent,
+} from '../utils';
+import { setLastRead } from '../utils/updateActiveChat';
+import { getUser } from '../ducks/user';
+import { updateActiveChat } from '../ducks/chatList';
 
 const InitialRenderItemsCount = 10;
 
@@ -15,10 +31,10 @@ const InitialRenderItemsCount = 10;
 const isLastRead = (index: number, type: string) =>
   index === 0 && type === 'read';
 
-const isLastReadInInitialRender = (unreadMessages: MessageI[]) =>
+const isLastReadInInitialRender = (unreadMessages: iMessage[]) =>
   unreadMessages.length < InitialRenderItemsCount;
 
-const getYContentOffset = R.path(['nativeEvent', 'contentOffset', 'y']);
+const getYContentOffset = R.path<number>(['nativeEvent', 'contentOffset', 'y']);
 
 // 50 is an approximate offset where last message becomes visible, it can be changed
 const hasReachedBottom = (event: NativeScrollEvent) =>
@@ -30,7 +46,7 @@ const makeRenderMessage = (scrollToLastReadMessage: Function) => ({
   section: { type },
 }: {
   index: number;
-  item: MessageI;
+  item: iMessage;
   section: { type: string };
 }) => {
   return (
@@ -46,27 +62,25 @@ const makeRenderMessage = (scrollToLastReadMessage: Function) => ({
   );
 };
 
-const renderUnreadFooter = ({
-  section: { data, type },
-}: {
-  section: { data: MessageI[]; type: string };
-}) => {
-  if (type === 'unread' && data.length > 0) {
-    return <Text>Unread Messages</Text>;
-  }
-};
-
 interface Props {
-  messages?: MessageI[];
-  users: ConversationUserI[];
+  chat: Conversation;
 }
 
-const MessagesList = ({ messages = [], users }: Props) => {
+const MessagesList = ({ chat }: Props) => {
+  const dispatch = useDispatch();
   const listRef = useRef();
-  const lastReadMessageIndex = useGetLastReadMessage(users, messages);
+  const currentUserId = useSelector(getUser);
+  const initialLastReadMessageIndex: number = useMemo(
+    () => getLastReadMessageIndex(chat, currentUserId),
+    [chat, currentUserId]
+  );
+  const lastReadMessageId = useRef(
+    R.path<string>(['messages', initialLastReadMessageIndex, 'id'], chat)
+  );
+  const { messages, users } = chat;
 
   const [readMessages, unreadMessages] = R.splitAt(
-    lastReadMessageIndex + 1,
+    initialLastReadMessageIndex + 1,
     messages
   );
 
@@ -78,7 +92,7 @@ const MessagesList = ({ messages = [], users }: Props) => {
     !isLastReadRendered
   );
 
-  // This is sent as callback to last read message and call on its render
+  // This is sent as callback to last read message and called on its render
   const scrollToLastReadMessage = useCallback(() => {
     if (listRef.current) {
       listRef.current.scrollToLocation({
@@ -92,6 +106,7 @@ const MessagesList = ({ messages = [], users }: Props) => {
       setTimeout(() => {
         setIsLastReadRendered(true);
       }, 400);
+      return 'Scrolled';
     }
   }, [listRef, setIsLastReadRendered]);
 
@@ -112,6 +127,7 @@ const MessagesList = ({ messages = [], users }: Props) => {
     }
   }, [listRef]);
 
+  // Shows and hides go to bottom button
   const toggleGoToBottomButton = useCallback(
     (event: NativeScrollEvent) => {
       if (hasReachedBottom(event)) {
@@ -121,6 +137,56 @@ const MessagesList = ({ messages = [], users }: Props) => {
       }
     },
     [isGoToBottomButtonVisible, setGoToBottomButtonVisible]
+  );
+
+  const setMessageSeen = useCallback(
+    ({
+      viewableItems,
+    }: {
+      viewableItems: Array<ViewToken>;
+      changed: Array<ViewToken>;
+    }) => {
+      if (isLastReadRendered && unreadMessages.length > 0) {
+        const lastViewableUnreadMessageId = getLastViewableUnread(
+          viewableItems
+        );
+        console.log(
+          {
+            lastViewableUnreadMessageId,
+            lastReadMessageId: lastReadMessageId.current,
+          },
+          isLastUnreadNewerThanCurrent(
+            lastViewableUnreadMessageId,
+            lastReadMessageId.current,
+            messages
+          )
+        );
+
+        if (
+          isLastUnreadNewerThanCurrent(
+            lastViewableUnreadMessageId,
+            lastReadMessageId.current,
+            messages
+          )
+        ) {
+          console.log('Setting to, ', lastViewableUnreadMessageId);
+          lastReadMessageId.current = lastViewableUnreadMessageId;
+        }
+      }
+    },
+    [isLastReadRendered, currentUserId, messages]
+  );
+
+  // On unmount,update the active chat in the chat list
+  useEffect(
+    () => () => {
+      dispatch(
+        updateActiveChat(
+          setLastRead(currentUserId, lastReadMessageId.current, chat)
+        )
+      );
+    },
+    []
   );
 
   return (
@@ -135,11 +201,13 @@ const MessagesList = ({ messages = [], users }: Props) => {
         ]}
         renderItem={makeRenderMessage(scrollToLastReadMessage)}
         onScrollToIndexFailed={handleScrollFailed}
-        // using Footer because the list is inverted
-        renderSectionFooter={renderUnreadFooter}
+        // List is inverted and so is order of footer and header
+        renderSectionFooter={renderUnreadMessagesSeparator}
         initialNumToRender={InitialRenderItemsCount}
         onScroll={toggleGoToBottomButton}
         scrollEventThrottle={1000}
+        // TODO: optimize debounce time
+        onViewableItemsChanged={debounce(setMessageSeen, 500)}
       />
       {isGoToBottomButtonVisible && (
         <GoToBottomButton onPress={scrollToBottom} />

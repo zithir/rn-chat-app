@@ -1,5 +1,4 @@
 import React from 'react';
-import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 import { StyleSheet, Text, View } from 'react-native';
 import 'react-native-gesture-handler';
@@ -8,25 +7,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { Chat, ChatList } from './Screens';
 import { Screens } from './constants';
-import chatListReducer, {
-  ReducerName as chatListReducerName,
-} from './ducks/chatList';
-
-import chatReducer, {
-  ReducerName as chatReducerName,
-} from './ducks/activeChat';
-
-import userReducer, { ReducerName as userReducerName } from './ducks/user';
+import store from './ducks';
 
 const Stack = createStackNavigator();
-
-const store = createStore(
-  combineReducers({
-    [chatListReducerName]: chatListReducer,
-    [chatReducerName]: chatReducer,
-    [userReducerName]: userReducer,
-  })
-);
 
 export default function App() {
   return (
