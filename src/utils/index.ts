@@ -11,22 +11,19 @@ export const findIndexById = (id: string) => R.findIndex(R.propEq('id', id));
 export const addOpacity = (color: string, opacity: string) =>
   `${color}${opacity}`;
 
-export const getLastReadMessageIndex = (
-  { users, messages }: Conversation,
-  userId: 'string'
-): number => {
-  const lastMessageId: string = R.o(
-    R.prop<string>('msg_id'),
-    findById(userId)
-  )(users);
-
-  return findIndexById(lastMessageId)(messages);
-};
-
 export const isLastUnreadNewerThanCurrent = (
   last: string,
   current: string,
   messages: Message[]
 ) => last && findIndexById(last)(messages) > findIndexById(current)(messages);
+
+export const getLastReadMessageIndex = (
+  { users, messages }: Conversation,
+  userId: 'string'
+): number => {
+  const lastMessageId: string = R.o(R.prop('msg_id'), findById(userId))(users);
+  console.log({ lastMessageId });
+  return lastMessageId ? findIndexById(lastMessageId)(messages) : -1;
+};
 
 export { default as getLastViewableUnread } from './getLastUnread';

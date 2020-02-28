@@ -20,7 +20,6 @@ import {
   getLastReadMessageIndex,
   isLastUnreadNewerThanCurrent,
 } from '../utils';
-import { setLastRead } from '../utils/updateActiveChat';
 import { getCurrentUserId } from '../ducks/users';
 import { updateLastRead } from '../ducks/chatList';
 
@@ -76,25 +75,29 @@ interface Props {
 const MessagesList = ({ chat }: Props) => {
   const dispatch = useDispatch();
   const listRef = useRef();
-  const chatRef = useRef(chat);
-  const hasScrolledToLastRead = useRef(false);
   const currentUserId = useSelector(getCurrentUserId);
+
   const initialLastReadMessageIndex: number = useMemo(
     () => getLastReadMessageIndex(chat, currentUserId),
     [chat, currentUserId]
   );
+
+  console.log({ initialLastReadMessageIndex });
+
   const lastReadMessageId = useRef(
     R.path<string>(['messages', initialLastReadMessageIndex, 'id'], chat)
   );
-  const { messages, users } = chat;
 
+  const { messages = [], users } = chat;
   const otherUsers = R.reject(R.propEq('id', currentUserId), users);
-  console.log({ users, otherUsers });
 
   const [readMessages, unreadMessages] = R.splitAt(
     initialLastReadMessageIndex + 1,
     messages
   );
+  console.log('Not fine');
+
+  console.log({ readMessages, unreadMessages });
 
   const [isLastReadRendered, setIsLastReadRendered] = useState(
     isLastReadInInitialRender(unreadMessages)
