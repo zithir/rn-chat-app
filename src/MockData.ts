@@ -47,7 +47,7 @@ export const Conversations: ConversationI[] = [
     name: 'Marty, Alex, Gloria, You',
     id: '4',
     users: [
-      { id: '0', msg_id: '9' },
+      { id: '0', msg_id: '20' },
       { id: '1', msg_id: '10' },
       { id: '2', msg_id: '20' },
       { id: '3', msg_id: '1' },

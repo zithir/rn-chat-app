@@ -88,6 +88,9 @@ const MessagesList = ({ chat }: Props) => {
   );
   const { messages, users } = chat;
 
+  const otherUsers = R.reject(R.propEq('id', currentUserId), users);
+  console.log({ users, otherUsers });
+
   const [readMessages, unreadMessages] = R.splitAt(
     initialLastReadMessageIndex + 1,
     messages
@@ -202,7 +205,7 @@ const MessagesList = ({ chat }: Props) => {
         ]}
         renderItem={makeRenderMessage(
           !isLastReadRendered ? scrollToLastReadMessage : undefined,
-          users
+          otherUsers
         )}
         onScrollToIndexFailed={handleScrollFailed}
         // List is inverted and so is order of footer and header

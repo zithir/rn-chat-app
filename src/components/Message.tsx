@@ -1,10 +1,10 @@
-import React, { useLayoutEffect } from 'react';
+import React, { useLayoutEffect, memo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { useGetIsYou, useGetUserName } from '../ducks/users';
 import { Message } from '../types';
 import { addOpacity } from '../utils';
-import UserBadge from './UserBadge';
+import UserBadgesRow from './UserBadgesRow';
 
 import { Colors } from '../styles';
 
@@ -13,50 +13,45 @@ interface Props extends Message {
   lastReadByIdList: string[];
 }
 
-export default ({
-  usr_id,
-  text,
-  scrollToLastReadMessage = () => undefined,
-  lastReadByIdList = [],
-}: Props) => {
-  const isYou = useGetIsYou(usr_id);
-  const userName = useGetUserName(usr_id) || '';
+export default memo(
+  ({
+    usr_id,
+    text,
+    scrollToLastReadMessage = () => undefined,
+    lastReadByIdList = [],
+  }: Props) => {
+    const isYou = useGetIsYou(usr_id);
+    const userName = useGetUserName(usr_id) || '';
 
-  // TODO: the first callback always fails as if the element is not rendered
-  // - fix, try using useEffect with arg
-  useLayoutEffect(() => {
-    scrollToLastReadMessage();
-  }, []);
+    // TODO: the first callback always fails as if the element is not rendered - fix
+    useLayoutEffect(() => {
+      scrollToLastReadMessage();
+    }, []);
 
-  return (
-    <View>
-      <View style={styles.message__inner}>
-        {!isYou && <Text style={styles['message__userName']}>{userName}</Text>}
-        <View
-          style={[
-            styles['message__text'],
-            styles[isYou ? 'message__text-you' : 'message__text-other'],
-          ]}
-        >
-          <Text>{text}</Text>
-        </View>
-      </View>
-      {lastReadByIdList.length > 0 && (
-        // I'd love to simplify or reduce these three nested views, but only in this configureation
-        // they seem to work as expected
-        <View style={styles.message__readBy}>
-          <View style={[styles.message__badgeRow]}>
-            <View style={styles.message__badges}>
-              {lastReadByIdList.map((id: string) => (
-                <UserBadge id={id} key={id} />
-              ))}
-            </View>
+    return (
+      <View>
+        <View style={styles.message__inner}>
+          {!isYou && (
+            <Text style={styles['message__userName']}>{userName}</Text>
+          )}
+          <View
+            style={[
+              styles['message__text'],
+              styles[isYou ? 'message__text-you' : 'message__text-other'],
+            ]}
+          >
+            <Text>{text}</Text>
           </View>
         </View>
-      )}
-    </View>
-  );
-};
+        {lastReadByIdList.length > 0 && (
+          <View style={styles.message__badgeRow}>
+            <UserBadgesRow lastReadByIdList={lastReadByIdList} />
+          </View>
+        )}
+      </View>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   ['message__inner']: {
@@ -82,20 +77,9 @@ const styles = StyleSheet.create({
     backgroundColor: addOpacity(Colors.Primary, '33'),
     marginRight: 50,
   },
-  ['message__readBy']: {
-    flex: 1,
-    alignContent: 'flex-end',
-    justifyContent: 'flex-end',
-  },
   ['message__badgeRow']: {
     flex: 1,
-    flexDirection: 'row',
-    position: 'absolute',
-  },
-  ['message__badges']: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+    alignContent: 'flex-end',
     justifyContent: 'flex-end',
   },
 });
