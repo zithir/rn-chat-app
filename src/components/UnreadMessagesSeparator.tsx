@@ -9,15 +9,22 @@ export default ({
 }) => {
   if (type === 'unread' && data.length > 0) {
     return (
+      // <View style={{ backgroundColor: 'red', flex: 1 }}>
       <Text
         style={{
+          position: 'absolute',
           borderBottomColor: 'black',
           borderBottomWidth: 1,
-          marginTop: 20,
+          // marginTop: ,
+          fontSize: 12,
+          flex: 1,
+          bottom: 2,
+          left: 2,
         }}
       >
         Unread Messages
       </Text>
+      // </View>
     );
   }
 };

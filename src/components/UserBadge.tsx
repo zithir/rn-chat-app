@@ -1,25 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { Animated, Text, StyleSheet } from 'react-native';
 import * as R from 'ramda';
-import { Colors } from '../styles';
-import { useGetUserName } from '../hooks';
-
-const BadgeColors = [
-  Colors.Primary,
-  Colors.Secondary,
-  Colors.Danger,
-  Colors.Warning,
-];
-
-const getRandomColor = () =>
-  BadgeColors[Math.floor(Math.random() * BadgeColors.length)];
-
+import { useGetUserName, useGetUserColor } from '../ducks/users';
 interface Props {
   id: string;
 }
 
 const UserBadge = ({ id }: Props) => (
-  <Text style={[styles.container, { backgroundColor: getRandomColor() }]}>
+  <Text style={[styles.container, { backgroundColor: useGetUserColor(id) }]}>
     {R.head(useGetUserName(id))}
   </Text>
 );
@@ -33,8 +21,8 @@ const styles = StyleSheet.create({
     textAlignVertical: 'center',
     padding: 2,
     margin: 1,
-    alignSelf: 'flex-start',
-    height: 20,
-    width: 20,
+    height: 16,
+    width: 16,
+    fontSize: 12,
   },
 });

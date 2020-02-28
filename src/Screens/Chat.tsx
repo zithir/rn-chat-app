@@ -1,3 +1,5 @@
+// @refresh reset
+
 import React, { useEffect, useCallback, useState } from 'react';
 import {
   View,

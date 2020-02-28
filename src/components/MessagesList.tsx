@@ -21,7 +21,7 @@ import {
   isLastUnreadNewerThanCurrent,
 } from '../utils';
 import { setLastRead } from '../utils/updateActiveChat';
-import { getUser } from '../ducks/user';
+import { getCurrentUserId } from '../ducks/users';
 import { updateActiveChat } from '../ducks/chatList';
 
 const InitialRenderItemsCount = 10;
@@ -31,8 +31,8 @@ const InitialRenderItemsCount = 10;
 const isLastRead = (index: number, type: string) =>
   index === 0 && type === 'read';
 
-const getIsLastReadBy = (messageId: string, users: ConversationUser[]) =>
-  R.filter(R.propEq('msg_id', messageId), users);
+const getLastReadByList = (messageId: string, users: ConversationUser[]) =>
+  R.o(R.map(R.prop('id')), R.filter(R.propEq('msg_id', messageId)))(users);
 
 const isLastReadInInitialRender = (unreadMessages: iMessage[]) =>
   unreadMessages.length < InitialRenderItemsCount;
@@ -64,7 +64,7 @@ const makeRenderMessage = (
       scrollToLastReadMessage={
         isLastRead(index, type) ? scrollToLastReadMessage : undefined
       }
-      lastReadBy={getIsLastReadBy(id, users)}
+      lastReadByIdList={getLastReadByList(id, users)}
     />
   );
 };
@@ -76,7 +76,9 @@ interface Props {
 const MessagesList = ({ chat }: Props) => {
   const dispatch = useDispatch();
   const listRef = useRef();
-  const currentUserId = useSelector(getUser);
+  const chatRef = useRef(chat);
+  const hasScrolledToLastRead = useRef(false);
+  const currentUserId = useSelector(getCurrentUserId);
   const initialLastReadMessageIndex: number = useMemo(
     () => getLastReadMessageIndex(chat, currentUserId),
     [chat, currentUserId]
@@ -118,7 +120,6 @@ const MessagesList = ({ chat }: Props) => {
       setTimeout(() => {
         setIsLastReadRendered(true);
       }, 500);
-      return 'Scrolled';
     }
   }, [listRef, setIsLastReadRendered]);
 
@@ -170,6 +171,11 @@ const MessagesList = ({ chat }: Props) => {
           )
         ) {
           lastReadMessageId.current = lastViewableUnreadMessageId;
+          dispatch(
+            updateActiveChat(
+              setLastRead(currentUserId, lastReadMessageId.current, chat)
+            )
+          );
         }
       }
     },
@@ -181,16 +187,16 @@ const MessagesList = ({ chat }: Props) => {
    * TODO: the action dispatches with the initial state of the chat, it should be
    * saved to a ref on each update or handled by redux
    * */
-  useEffect(
-    () => () => {
-      dispatch(
-        updateActiveChat(
-          setLastRead(currentUserId, lastReadMessageId.current, chat)
-        )
-      );
-    },
-    []
-  );
+  // useEffect(
+  //   () => () => {
+  //     dispatch(
+  //       updateActiveChat(
+  //         setLastRead(currentUserId, lastReadMessageId.current, chat)
+  //       )
+  //     );
+  //   },
+  //   []
+  // );
 
   return (
     <>
@@ -202,7 +208,10 @@ const MessagesList = ({ chat }: Props) => {
           { type: 'unread', data: R.reverse(unreadMessages) },
           { type: 'read', data: R.reverse(readMessages) },
         ]}
-        renderItem={makeRenderMessage(scrollToLastReadMessage, users)}
+        renderItem={makeRenderMessage(
+          !isLastReadRendered ? scrollToLastReadMessage : undefined,
+          users
+        )}
         onScrollToIndexFailed={handleScrollFailed}
         // List is inverted and so is order of footer and header
         renderSectionFooter={renderUnreadMessagesSeparator}
@@ -212,8 +221,9 @@ const MessagesList = ({ chat }: Props) => {
         // TODO: optimize debounce time
         onViewableItemsChanged={debounce(setMessageSeen, 500)}
         viewabilityConfig={{
-          // Message must be either whole visible or cover the whole viewport to be considered viewable
-          viewAreaCoveragePercentThreshold: 100,
+          viewAreaCoveragePercentThreshold: 80,
+          waitForInteraction: true,
+          minimumViewTime: 800,
         }}
       />
       {isGoToBottomButtonVisible && (

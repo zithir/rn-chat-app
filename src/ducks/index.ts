@@ -9,13 +9,13 @@ import chatListReducer, {
 //   setSeenMiddleware,
 // } from './activeChat';
 
-import userReducer, { ReducerName as userReducerName } from './user';
+import usersReducer, { ReducerName as usersReducerName } from './users';
 
 export default createStore(
   combineReducers({
     [chatListReducerName]: chatListReducer,
     // [chatReducerName]: chatReducer,
-    [userReducerName]: userReducer,
+    [usersReducerName]: usersReducer,
   })
   // applyMiddleware(setSeenMiddleware)
 );
