@@ -184,25 +184,15 @@ const MessagesList = ({ chat }: Props) => {
     [isLastReadRendered, currentUserId, messages]
   );
 
-  /**
-   * On unmount,update the active chat in the chat list
-   * TODO: the action dispatches with the initial state of the chat, it should be
-   * saved to a ref on each update or handled by redux
-   * */
-  // useEffect(
-  //   () => () => {
-  //     dispatch(
-  //       updateActiveChat(
-  //         setLastRead(currentUserId, lastReadMessageId.current, chat)
-  //       )
-  //     );
-  //   },
-  //   []
-  // );
+  const closeModal = useCallback(() => setIsLastReadRendered(true), []);
 
   return (
     <>
-      {!isLastReadRendered && <LoadingModal />}
+      <LoadingModal
+        visible={!isLastReadRendered}
+        onRequestClose={closeModal}
+        onDismiss={closeModal}
+      />
       <SectionList
         inverted
         ref={listRef}

@@ -1,17 +1,24 @@
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet, Modal } from 'react-native';
 
-const IndicatorCover = () => {
-  return (
-    <Modal>
-      <View style={styles.container}>
-        <ActivityIndicator size={32} />
-      </View>
-    </Modal>
-  );
-};
+interface Props {
+  onDismiss: () => void;
+  onRequestClose: () => void;
+  visible: boolean;
+}
 
-export default IndicatorCover;
+export default ({ onDismiss, onRequestClose, visible }: Props) => (
+  <Modal
+    visible={visible}
+    animationType="fade"
+    onDismiss={onDismiss}
+    onRequestClose={onRequestClose}
+  >
+    <View style={styles.container}>
+      <ActivityIndicator size={32} />
+    </View>
+  </Modal>
+);
 
 const styles = StyleSheet.create({
   container: {
