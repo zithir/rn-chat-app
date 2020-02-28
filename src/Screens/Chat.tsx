@@ -16,7 +16,7 @@ import { getRouteParam } from '../utils';
 import { setLastRead } from '../utils/updateActiveChat';
 import MessageInput from '../components/MessageInput';
 import MessagesList from '../components/MessagesList';
-import { getSingleChat, updateActiveChat } from '../ducks/chatList';
+import { getSingleChat, updateLastRead } from '../ducks/chatList';
 import { Conversation } from '../types';
 
 // TODO: use Navigation interface
@@ -33,7 +33,13 @@ const Chat = ({ navigation: { setOptions }, ...otherProps }: Props) => {
   //DEBUG: simulates that Gloria reads everyting after 5 seconds
   useEffect(() => {
     setTimeout(() => {
-      dispatch(updateActiveChat(setLastRead('3', '29', chat)));
+      dispatch(
+        updateLastRead({
+          userId: '3',
+          messageId: '29',
+          chatId: chat.id,
+        })
+      );
     }, 5000);
   }, []);
 

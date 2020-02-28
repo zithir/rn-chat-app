@@ -1,33 +1,49 @@
 // TODO: whatewer typescript wants from me
-import { handleAction, createAction } from 'redux-actions';
-import { ActionCreator } from 'redux';
+import { handleActions, createActions } from 'redux-actions';
 import * as R from 'ramda';
 import { findById, findIndexById } from '../utils';
-import { Action, Message, Conversation } from '../types';
+import { Action, Conversation } from '../types';
 
 import { Conversations } from '../MockData';
 
 export const ReducerName = 'conversations';
 
-type State = Conversation[];
-
 const defaultState = Conversations;
 
-interface SaveChatAction extends Action {
-  payload: Conversation;
+type State = typeof defaultState;
+
+interface UpdateLastReadAction extends Action {
+  payload: { userId: string; messageId: string; chatId: string };
 }
 
-const updateChat = (
-  chatList: Conversation[],
-  { payload: chat }: SaveChatAction
-) => R.update(findIndexById(chat.id)(chatList), chat, chatList);
+const updateChat = R.curry((chat, chatList) =>
+  R.update(findIndexById(chat.id)(chatList), chat, chatList)
+);
 
-export const updateActiveChat: (
-  payload: Conversation
-) => SaveChatAction = createAction('SAVE_ACTIVE_CHAT');
+const setLastRead = (userId: string, messageId: string, chat: Conversation) =>
+  R.set(
+    R.lensPath(['users', findIndexById(userId)(chat.users), 'msg_id']),
+    messageId,
+    chat
+  );
 
-export const getAllChats = R.prop(ReducerName);
+export const { updateLastRead } = createActions('UPDATE_LAST_READ');
+
+export const getAllChats = R.prop<Conversation[]>(ReducerName);
 
 export const getSingleChat = (id: string) => R.o(findById(id), getAllChats);
 
-export default handleAction(updateActiveChat, updateChat, defaultState);
+export default handleActions(
+  {
+    [updateLastRead]: (
+      state: State,
+      { payload: { userId, messageId, chatId } }: UpdateLastReadAction
+    ) => {
+      return updateChat(
+        setLastRead(userId, messageId, findById(chatId)(state)),
+        state
+      );
+    },
+  },
+  defaultState
+);

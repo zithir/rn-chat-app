@@ -22,7 +22,7 @@ import {
 } from '../utils';
 import { setLastRead } from '../utils/updateActiveChat';
 import { getCurrentUserId } from '../ducks/users';
-import { updateActiveChat } from '../ducks/chatList';
+import { updateLastRead } from '../ducks/chatList';
 
 const InitialRenderItemsCount = 10;
 
@@ -172,9 +172,11 @@ const MessagesList = ({ chat }: Props) => {
         ) {
           lastReadMessageId.current = lastViewableUnreadMessageId;
           dispatch(
-            updateActiveChat(
-              setLastRead(currentUserId, lastReadMessageId.current, chat)
-            )
+            updateLastRead({
+              userId: currentUserId,
+              messageId: lastReadMessageId.current,
+              chatId: chat.id,
+            })
           );
         }
       }
@@ -221,7 +223,7 @@ const MessagesList = ({ chat }: Props) => {
         // TODO: optimize debounce time
         onViewableItemsChanged={debounce(setMessageSeen, 500)}
         viewabilityConfig={{
-          viewAreaCoveragePercentThreshold: 80,
+          viewAreaCoveragePercentThreshold: 10,
           waitForInteraction: true,
           minimumViewTime: 800,
         }}
