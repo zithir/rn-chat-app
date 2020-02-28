@@ -27,7 +27,7 @@ const makeRenderChatItem = (navigate: Function) => ({
 }) => {
   return (
     <TouchableHighlight key={id} onPress={() => navigate(Screens.CHAT, { id })}>
-      <View style={styles['chatList--item']}>
+      <View style={styles['chatList__item']}>
         <Text style={{ fontSize: 24, fontWeight: 'bold' }}>{name}</Text>
         <Text>{getLastMessageText(messages)}</Text>
       </View>
@@ -55,7 +55,8 @@ const ChatList = ({ navigation: { navigate } }: Props) => {
 export default ChatList;
 
 const styles = StyleSheet.create({
-  ['chatList--item']: {
+  ['chatList__item']: {
+    height: 60,
     borderStyle: 'solid',
     borderBottomColor: Colors.Text,
     borderBottomWidth: 1,
