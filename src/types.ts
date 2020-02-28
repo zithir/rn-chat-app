@@ -10,14 +10,14 @@ export interface Message {
   usr_id: string;
 }
 
-export interface ConversationUser {
+export interface ChatUser {
   id: string;
   msg_id?: string;
 }
 
-export interface Conversation {
+export interface Chat {
   id: string;
   name: string;
   messages?: Message[];
-  users: ConversationUser[];
+  users: ChatUser[];
 }

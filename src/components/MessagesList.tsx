@@ -14,7 +14,7 @@ import Message from './Message';
 import LoadingModal from './LoadingModal';
 import GoToBottomButton from './GoToBottomButton';
 import renderUnreadMessagesSeparator from './UnreadMessagesSeparator';
-import { Conversation, Message as iMessage, ConversationUser } from '../types';
+import { Chat, Message as iMessage, ChatUser } from '../types';
 import {
   getLastViewableUnread,
   getLastReadMessageIndex,
@@ -30,7 +30,7 @@ const InitialRenderItemsCount = 10;
 const isLastRead = (index: number, type: string) =>
   index === 0 && type === 'read';
 
-const getLastReadByList = (messageId: string, users: ConversationUser[]) =>
+const getLastReadByList = (messageId: string, users: ChatUser[]) =>
   R.o(R.map(R.prop('id')), R.filter(R.propEq('msg_id', messageId)))(users);
 
 const isLastReadInInitialRender = (unreadMessages: iMessage[]) =>
@@ -44,7 +44,7 @@ const hasReachedBottom = (event: NativeScrollEvent) =>
 
 const makeRenderMessage = (
   scrollToLastReadMessage: Function,
-  users: ConversationUser[]
+  users: ChatUser[]
 ) => ({
   index,
   item: { usr_id, text, id },
@@ -69,7 +69,7 @@ const makeRenderMessage = (
 };
 
 interface Props {
-  chat: Conversation;
+  chat: Chat;
 }
 
 const MessagesList = ({ chat }: Props) => {

@@ -2,13 +2,13 @@
 import { handleActions, createActions } from 'redux-actions';
 import * as R from 'ramda';
 import { findById, findIndexById } from '../utils';
-import { Action, Conversation } from '../types';
+import { Action, Chat } from '../types';
 
-import { Conversations } from '../MockData';
+import { Chats } from '../MockData';
 
 export const ReducerName = 'conversations';
 
-const defaultState = Conversations;
+const defaultState = Chats;
 
 type State = typeof defaultState;
 
@@ -20,7 +20,7 @@ const updateChat = R.curry((chat, chatList) =>
   R.update(findIndexById(chat.id)(chatList), chat, chatList)
 );
 
-const setLastRead = (userId: string, messageId: string, chat: Conversation) =>
+const setLastRead = (userId: string, messageId: string, chat: Chat) =>
   R.set(
     R.lensPath(['users', findIndexById(userId)(chat.users), 'msg_id']),
     messageId,
@@ -29,7 +29,7 @@ const setLastRead = (userId: string, messageId: string, chat: Conversation) =>
 
 export const { updateLastRead } = createActions('UPDATE_LAST_READ');
 
-export const getAllChats = R.prop<Conversation[]>(ReducerName);
+export const getAllChats = R.prop<Chat[]>(ReducerName);
 
 export const getSingleChat = (id: string) => R.o(findById(id), getAllChats);
 

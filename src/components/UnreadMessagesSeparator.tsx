@@ -1,15 +1,14 @@
 import React from 'react';
-import { View, Text } from 'react-native';
-import { MessageI } from '../MockData';
+import { Text } from 'react-native';
+import { Message } from '../types';
 
 export default ({
   section: { data, type },
 }: {
-  section: { data: MessageI[]; type: string };
+  section: { data: Message[]; type: string };
 }) => {
   if (type === 'unread' && data.length > 0) {
     return (
-      // <View style={{ backgroundColor: 'red', flex: 1 }}>
       <Text
         style={{
           position: 'absolute',
@@ -24,7 +23,6 @@ export default ({
       >
         Unread Messages
       </Text>
-      // </View>
     );
   }
 };

@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import { Conversation, Message } from '../types';
+import { Chat, Message } from '../types';
 
 export const getRouteParam = (key: string) =>
   R.path<string>(['route', 'params', key]);
@@ -18,7 +18,7 @@ export const isLastUnreadNewerThanCurrent = (
 ) => last && findIndexById(last)(messages) > findIndexById(current)(messages);
 
 export const getLastReadMessageIndex = (
-  { users, messages }: Conversation,
+  { users, messages }: Chat,
   userId: 'string'
 ): number => {
   const lastMessageId: string = R.o(R.prop('msg_id'), findById(userId))(users);

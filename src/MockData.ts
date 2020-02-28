@@ -1,28 +1,6 @@
-export interface MessageI {
-  id: string;
-  text: string;
-  usr_id: string;
-  seen?: boolean;
-}
+import { Chat, User } from './types';
 
-export interface ConversationUserI {
-  id: string;
-  msg_id?: string;
-}
-
-export interface ConversationI {
-  id: string;
-  name: string;
-  messages?: MessageI[];
-  users: ConversationUserI[];
-}
-
-interface UserI {
-  id: string;
-  name: string;
-}
-
-export const Conversations: ConversationI[] = [
+export const Chats: Chat[] = [
   {
     name: 'Marty',
     id: '1',
@@ -161,7 +139,7 @@ export const Conversations: ConversationI[] = [
   },
 ];
 
-export const Users: UserI[] = [
+export const Users: User[] = [
   { id: '0', name: 'Melman' },
   { id: '1', name: 'Marty' },
   { id: '2', name: 'Alex' },

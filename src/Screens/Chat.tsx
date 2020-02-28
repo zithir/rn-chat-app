@@ -17,7 +17,7 @@ import { setLastRead } from '../utils/updateActiveChat';
 import MessageInput from '../components/MessageInput';
 import MessagesList from '../components/MessagesList';
 import { getSingleChat, updateLastRead } from '../ducks/chatList';
-import { Conversation } from '../types';
+import { Chat as iChat } from '../types';
 
 // TODO: use Navigation interface
 interface Props extends Route {
@@ -27,7 +27,7 @@ interface Props extends Route {
 
 const Chat = ({ navigation: { setOptions }, ...otherProps }: Props) => {
   const id: string = getRouteParam('id')(otherProps);
-  const chat: Conversation = useSelector(getSingleChat(id));
+  const chat: iChat = useSelector(getSingleChat(id));
   const dispatch = useDispatch();
 
   //DEBUG: simulates that Gloria reads everyting after 5 seconds
