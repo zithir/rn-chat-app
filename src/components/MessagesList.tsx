@@ -229,7 +229,10 @@ const MessagesList = ({ chat }: Props) => {
         }}
       />
       {isGoToBottomButtonVisible && (
-        <GoToBottomButton onPress={scrollToBottom} />
+        <GoToBottomButton
+          onPress={scrollToBottom}
+          areUnread={unreadMessages.length > 0}
+        />
       )}
     </>
   );

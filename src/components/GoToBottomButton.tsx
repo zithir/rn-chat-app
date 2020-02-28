@@ -10,12 +10,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../styles';
 
 interface Props {
+  areUnread: boolean;
   onPress: (event: GestureResponderEvent) => void;
 }
 
-const GoToBottomButton = ({ onPress: handlePress }: Props) => {
+const GoToBottomButton = ({ areUnread, onPress: handlePress }: Props) => {
   return (
     <View style={styles.container}>
+      {areUnread && <View style={styles.unreadBadge} />}
       <TouchableOpacity onPress={handlePress}>
         <Ionicons
           name="ios-arrow-dropdown-circle"
@@ -34,5 +36,15 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     right: 20,
+    flex: 1,
+    flexDirection: 'row-reverse',
+  },
+  unreadBadge: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 99,
+    backgroundColor: Colors.Danger,
+    zIndex: 1,
   },
 });
